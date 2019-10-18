@@ -1,0 +1,3 @@
+#!/bin/sh
+
+notify-send "Blätter synchronisiert. Bericht:\n$(uebsync 2>/dev/null)"

@@ -1,0 +1,45 @@
+#!/bin/sh
+
+if [ "$#" -ne 2 ]; then
+    echo "Usage: uebenhance [infile] [outfile]"
+    exit 1
+fi
+
+tmpdir=$(mktemp -d --suffix -UEB)
+input=$(realpath "$1")
+output=$(realpath "$2")
+
+echo "Dir: ${tmpdir}"
+
+pdfimages -j "$input" "$tmpdir/ueb"
+for img in $tmpdir/*.jpg; do
+
+    echo "Converting ${img}..."
+
+    convert -threshold 50% -shave 50x50 "$img" "$tmpdir/thresh.jpg"
+    if [ $(identify -format "%k" "$tmpdir/thresh.jpg") -gt 5 ]; then
+        convert \
+            -rotate 270 \
+            -set colorspace RGB \
+            -normalize \
+            -sharpen 0x1 \
+            -quality 40 \
+	    -resize 100% \
+            -sampling-factor 4:2:0 \
+            "${img}" "${img}.new.jpg"
+
+        echo "File Size:"
+        du "$img"
+        du "${img}.new.jpg"
+    else
+        echo "Image ${img} appears to be empty. Skipping."
+    fi
+
+    echo
+done
+
+convert -compress jpeg $(ls ${tmpdir}/*.new.jpg) "$output"
+rm -r $tmpdir
+
+echo "\nTOTAL:"
+du "$input" "$output"

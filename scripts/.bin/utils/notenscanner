@@ -1,0 +1,127 @@
+#!/usr/bin/env python3
+
+import sys
+import math
+import tempfile
+
+from PIL import Image
+
+
+print("Willkommen.")
+
+
+def enter_size(prompt, default, checker=None):
+    while True:
+        try:
+            inp = input(prompt)
+            if inp == "":
+                return default
+            res = int(inp)
+            if checker(res):
+                return res
+            else:
+                raise BaseException()
+        except:
+            print("Invalide Eingabe. Nochmal versuchen.")
+            continue
+
+def choice(msg, choices, default):
+    while True:
+        print(msg)
+        for i, line in enumerate(choices):
+            print("[{}] {}".format(str(i+1), line))
+        try:
+            inp = input(" > ")
+            if inp == "":
+                return default
+            
+            choice = int(inp)
+            if choice-1 in range(len(choices)):
+                return choice
+            else:
+                raise BaseException()
+        except:
+            continue
+
+def run(images):
+    print("Lade Bilder...")
+    print("Scangröße eingeben. Leer lassen für A4.")
+
+    width = enter_size("Breite: [210mm] > ", 210)
+    height = enter_size("Höhe: [297mm] > ", 297)
+
+    print("Zuschneidegröße eingeben. Leer lassen für A4.")
+
+    crop_width = enter_size("Breite: [210mm] > ", 210, lambda size: size <= width)
+    crop_height = enter_size("Höhe: [297mm] > ", 297, lambda size: size <= height)
+
+    print("---")
+
+    resolution_opts = [
+        "100 dpi - 827px * 1169px",
+        "200 dpi - 1645px * 2338px",
+        "300 dip - 2481px * 3507px",
+    ]
+    resolutions = [
+        "dummy",
+        (1169, 827),
+        (2338, 1645),
+        (3507, 2481),
+    ]
+    res_choice = choice("Auflösung eingeben (Standart 100 DPI)", resolution_opts, 1)
+    resolution = resolutions[res_choice]
+
+    print("---")
+
+    print("Schneide zu.")
+
+    for i, image in enumerate(images):
+        im_width, im_height = image.size
+        croprect = (
+            0, 0,
+            int(im_width * (crop_width / width)),
+            int(im_height * (crop_height / height))
+        )
+        images[i] = image.crop(croprect)
+
+    print("Platziere.")
+
+    pages = []
+
+    # make sure images has an even number of elements
+    if len(images) % 2 != 0:
+        images.append(None)
+
+    imgs_sorted = [(images[i], images[i+1]) for i in range(0, len(images), 2)]
+    for (img_left, img_right) in imgs_sorted:
+        page = Image.new("L", resolution, color=255) #TODO: proper mode
+
+        img_left.thumbnail(resolution)
+        page.paste(img_left, (0,0))
+
+        if img_right:
+            page_width, _ = resolution
+            img_right.thumbnail(resolution)
+            page.paste(img_right, (int(page_width / 2), 0)) 
+
+        pages.append(page)
+
+    if len(pages) > 0:
+        pages[0].show()
+        pages[0].save("result.pdf", resolution=300)
+        for page in pages[1:]:
+            page.save("result.pdf", resolution=300, append=True)
+
+
+
+if __name__ == "__main__":
+    print("Lade Bilder...")
+    images = []
+    for path in sys.argv[1:]:
+        with Image.open(path) as image:
+            images.append(image.copy())
+    print("Fertig.")
+    if images == []:
+        print("Keine Bilder. Ende.")
+        sys.exit(1)
+    run(images)

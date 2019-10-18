@@ -1,0 +1,16 @@
+#!/bin/sh
+
+file="$*"
+
+if [ $# -lt 1 ]; then
+    echo "Usage: fileopen [FILE]"
+    exit 1
+fi
+
+
+case "$file" in
+    *.pdf)  zathura "$file" & ;;
+    *.tex)  vim "$file" ;;
+    *.odt)  lowriter "$file" ;;
+    *.jpg)  feh "$file" & ;;
+esac

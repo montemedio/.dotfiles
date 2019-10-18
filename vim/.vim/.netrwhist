@@ -1,0 +1,10 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =8
+let g:netrw_dirhist_1='/home/lukas/.config/syncthing'
+let g:netrw_dirhist_2='/etc/apt/sources.list.d'
+let g:netrw_dirhist_3='/home/lukas/Dokumente/Uni/SoSe19/OPJ/Projektaufgabe/dw/controller'
+let g:netrw_dirhist_4='/home/lukas/Dokumente/Uni/SoSe19/OPJ/Projektaufgabe/dw/model/tiles'
+let g:netrw_dirhist_5='/home/lukas/Dokumente/Uni/SoSe19/OPJ/Projektaufgabe/dw/view'
+let g:netrw_dirhist_6='/home/lukas/Dokumente/Milchenbach/2019/Film'
+let g:netrw_dirhist_7='/home/lukas/.dotfiles/scripts/.bin/utils'
+let g:netrw_dirhist_8='/home/lukas/.dotfiles/vim/.vim'

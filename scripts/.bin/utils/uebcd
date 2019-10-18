@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# Falls Im Terminal ausgeführt:
+if [ -t 0 ]; then
+    choice=$(find $SEMESTER -mindepth 1 -maxdepth 2 -type d | fzf -i --color 16)
+    [ $? -eq 0 ] && cd $choice
+else
+    choice=$(find $SEMESTER -mindepth 1 -maxdepth 2 -type d | dmenu -i -l 10) 
+    [ $? -eq 0 ] && st -e $SHELL -c "cd $choice && $SHELL"
+fi

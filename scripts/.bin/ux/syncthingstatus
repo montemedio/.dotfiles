@@ -1,0 +1,7 @@
+#!/bin/bash
+
+apikey=$(xmllint --xpath '/configuration/gui/apikey/text()' ~/.config/syncthing/config.xml)
+
+#curl -X POST -H "X-API-Key: $apikey" http://localhost:8384/rest/system/status
+curl -H "X-API-Key: $apikey" http://localhost:8384/rest/db/status?folder="8of18-z1wsz"
+

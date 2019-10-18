@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# Falls Im Terminal ausgeführt:
+if [ -t 0 ]; then
+    choice=$(find $SEMESTER -type f -name '*.pdf' | awk -F $SEMESTER/ '{print $2}' | sort | fzf -i --color 16)
+else
+    choice=$(find $SEMESTER -type f -name '*.pdf' | awk -F $SEMESTER/ '{print $2}' | sort | dmenu -i -l 10) 
+fi
+
+[ $? -eq 0 ] && zathura "$SEMESTER/$choice" &	

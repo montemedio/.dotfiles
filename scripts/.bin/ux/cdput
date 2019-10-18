@@ -1,0 +1,34 @@
+#!/bin/sh
+
+echo_stderr()
+{
+    echo "$@" >&2
+}
+
+cwdfile="/dev/shm/${USER}-cwd"
+
+umask 066
+
+if [ -f $cwdfile ]; then
+    touch $cwdfile
+fi
+
+if [ "$#" -eq 1 ]; then
+    dir="$1"
+elif [ "$#" -eq 0 ]; then
+    dir="$HOME"
+else
+    echo_stderr "Usage: cdput [DIR]"
+    exit 1
+fi
+
+. cd "$dir"
+
+if [ $? -eq 0 ]; then
+    echo "$dir" | cat - $cwdfile | uniq 
+
+
+    echo test
+
+fi
+

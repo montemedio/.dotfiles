@@ -1,0 +1,33 @@
+#!/bin/sh
+
+if [ "$#" -ne 1 ]; then
+    echo "Usage: uebingest [infile]"
+    exit 1
+fi
+
+if [ ! -f "$1" ]; then
+    echo "No such file"
+    exit 1
+fi
+
+input=$(realpath "$1")
+
+echo
+echo "Filename: $(basename "${input}")"
+fach=$(echo 'GTI\nAnalysisI\nM-NWII\nPhysikII' | fzf --height=10 --color 16)
+typ=$(echo 'Abgabe\nKorrektur' | fzf --height=10 --color 16)
+echo -n "Blattnummer?  "
+read nr
+
+output=$(printf "%s/Blatt%02d%s.pdf" $SEMESTER/$fach $nr $typ)
+echo moving to $output.
+
+if [ -f $output ]; then
+    echo -n "Error: File already exists. Proceed anyway? [y/N] "
+    read response
+    if [ ! $response = "y" ] && [ $response = "Y" ]; then
+        exit 1
+    fi
+fi
+
+mv "$input" "$output"

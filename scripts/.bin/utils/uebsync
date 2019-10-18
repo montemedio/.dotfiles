@@ -1,0 +1,165 @@
+#!/usr/bin/env python3
+
+import mechanize
+import os
+import re
+import sys
+import pathlib
+
+
+targets_lernraum = [
+    #GTI 
+    {
+        "name": "GTI",
+        "baseurl": "https://bis.uni-bielefeld.de/sites/16614/Documents/%C3%9Cbungen/",
+        "form": "Blatt{:02d}.pdf",
+        "form_regex": "Blatt(\\d\\d)\\.pdf",
+        "dest_form": None,
+        "destination": "/home/lukas/Dokumente/Uni/SoSe19/GTI"
+    },
+    #Analysis
+    {
+        "name": "AnalysisI",
+        "baseurl": "https://bis.uni-bielefeld.de/sites/17199/Documents/",
+        "form": "Blatt{}.pdf",
+        "form_regex": "Blatt(\\d\\d)\\.pdf",
+        "dest_form": "Blatt{:02d}.pdf",
+        "destination": "/home/lukas/Dokumente/Uni/SoSe19/AnalysisI"
+    }
+]
+
+targets_open = [
+    #M-NW
+    {
+        "name": "M-NWII",
+        "baseurl": "https://www.math.uni-bielefeld.de/~gaehler/NWI-II/",
+        "form": "ueb{:02d}.pdf",
+        "form_regex": "Blatt(\\d\\d)\\.pdf",
+        "dest_form": "Blatt{:02d}.pdf",
+        "destination": "/home/lukas/Dokumente/Uni/SoSe19/M-NWII"
+    },
+    #M-NW-Pueb
+    {
+        "name": "M-NWII-Pueb",
+        "baseurl": "https://www.math.uni-bielefeld.de/~gaehler/NWI-II/",
+        "form": "pueb{:02d}.pdf",
+        "form_regex": "Pueb(\\d\\d)\\.pdf",
+        "dest_form": "Pueb{:02d}.pdf",
+        "destination": "/home/lukas/Dokumente/Uni/SoSe19/M-NWII"
+    },
+    #Physik
+    {
+        "name": "PhysikII",
+        "baseurl": "https://www.physik.uni-bielefeld.de/~verbiest/Teaching/Nebenfach2/",
+        "form": "{:02d}_HA.pdf",
+        "form_regex": "Blatt(\\d\\d)\\.pdf",
+        "dest_form": "Blatt{:02d}.pdf",
+        "destination": "/home/lukas/Dokumente/Uni/SoSe19/PhysikII",
+        "start_at": 2
+    },
+    {
+        "name": "PhysikII-Pueb",
+        "baseurl": "https://www.physik.uni-bielefeld.de/~verbiest/Teaching/Nebenfach2/",
+        "form": "{:02d}_PA.pdf",
+        "form_regex": "Pueb(\\d\\d)\\.pdf",
+        "dest_form": "Pueb{:02d}.pdf",
+        "destination": "/home/lukas/Dokumente/Uni/SoSe19/PhysikII",
+        "start_at": 2
+    },
+]
+
+USR = "2955491"
+PASS = "UbK9VY6i"
+
+def authenticate_lernraum(br):
+    response = br.open("https://ekvv.uni-bielefeld.de/idp/login?wa=wsignin1.0&wtrealm=https%3a%2f%2fbis.uni-bielefeld.de&wctx=https%3a%2f%2fbis.uni-bielefeld.de%2f_layouts%2f15%2fAuthenticate.aspx%3fSource%3d%252F&wreply=https%3a%2f%2fbis.uni-bielefeld.de%2f_trust%2fdefault.aspx")
+    br.form = br.forms()[0]
+    br.find_control("username").value = USR
+    br.find_control("password").value = PASS
+    response = br.submit()
+    br.form = br.forms()[0]
+    response = br.submit()
+
+def download(br, baseurl, form, dest_form, destination, start_at):
+    i = start_at
+
+    sys.stderr.write("Searching {}, starting at Ix {}. Destination: {}\n".format(
+                     baseurl, start_at, destination))
+
+    n_downloaded = 0
+
+    while True:
+        resp = None
+        url = (baseurl + form).format(i)
+        sys.stderr.write("Fetching {}:  ".format(url))
+        try:
+            resp = br.open(url)
+        except:
+            sys.stderr.write("404.\n")
+            break
+
+        if dest_form == None:
+            dest_form = form
+        dest_path = os.path.join(destination, dest_form)
+
+        f = open(dest_path.format(i), "wb")
+        f.write(resp.read())
+        f.close()
+        sys.stderr.write("done.\n")
+
+        i += 1
+        n_downloaded += 1
+
+    sys.stderr.write("\n")
+
+    return n_downloaded
+
+def do_target(br, target):
+    # sichergehen, dass die destination existiert
+    pathlib.Path(target["destination"]).mkdir(parents=True, exist_ok=True)
+
+    items = os.listdir(target["destination"])
+
+    if "start_at" in target:
+        start_at = target["start_at"]
+    else:
+        start_at = 1
+
+    for item in items:
+        m = re.search(target["form_regex"], item)
+        if m == None:
+            continue
+        else:
+            cur_ix = int(m.group(1))
+            if start_at < cur_ix + 1:
+                start_at = cur_ix + 1
+
+    n_downloaded = download(
+        br,
+        target["baseurl"],
+        target["form"],
+        target["dest_form"],
+        target["destination"],
+        start_at
+    )
+    return n_downloaded
+
+def print_report(n_downloads):
+    for target in n_downloads:
+        print(target + " " + str(n_downloads[target]))
+
+if __name__ == "__main__":
+    br = mechanize.Browser()
+    br.set_handle_robots(False)
+
+    n_downloads = dict()
+
+    authenticate_lernraum(br)
+    for target in targets_lernraum:
+        n_downloads[target["name"]] = do_target(br, target)
+
+    for target in targets_open:
+        n_downloads[target["name"]] = do_target(br, target)
+
+    print_report(n_downloads)
+

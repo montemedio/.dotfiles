@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd $(dirname $1)
+pdflatex $(basename $1)
+rm $(basename $1 .tex).aux
+rm $(basename $1 .tex).log
