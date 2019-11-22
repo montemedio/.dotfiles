@@ -1,5 +1,0 @@
-#!/bin/bash
-
-# pdb: Open Password Database
-
-keepassxc "Passwörter/Passwörter.kdbx"
