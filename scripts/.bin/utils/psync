@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# psync: Passwörter vom Passwort-Stick synchronisieren
+
+PWD_UUID="443A-8AAC"
+
+##################
+
+block_device="/dev/disk/by-uuid/${PWD_UUID}"
+udisks_msg=$(udisksctl mount -o ro -b $block_device 2>&1)
+udisks_status=$?
+echo "udisksctl exited with message:"
+echo $udisks_msg
+
+if [ ! $udisks_status -eq 0 ]; then
+    msg="psync exit with status code: $udisks_status. Nothing happened"
+    echo "$msg"
+    notify-send -u critical "$msg"
+    exit $udisks_status
+fi
+
+mount_dir=$(echo $udisks_msg | awk '{print $4}' | tr -d .)
+
+umask "u=r,g=,o="
+cp ~/Passwörter/Passwörter.kdbx ~/Passwörter/.psync_rollback_$(date +"%Y_%m_%d-%H:%M:%S").kdbx
+rm -f ~/Passwörter/Passwörter.kdbx
+cp $mount_dir/Passwörter.kdbx ~/Passwörter/Passwörter.kdbx
+
+umount $block_device
+
+echo "psync: Success"
+notify-send "psync: Success"

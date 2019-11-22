@@ -51,9 +51,17 @@ let mapleader =","
     autocmd FileType tex inoremap ,te \text{}<Space><++><Esc>T{i
 
 	autocmd FileType tex inoremap ,ce \coloneqq<Space>
+    autocmd FileType tex inoremap ,st \stackrel{<++>}{<++>} <++><Esc>?<++><Enter>nn"_ct}
+
+    autocmd FileType tex inoremap ,or \lor<Space>
+    autocmd FileType tex inoremap ,an \land<Space>
+    autocmd FileType tex inoremap ,no \lnot<Space>
 
 " Java.
     set wildignore=*.class
+
+" Haskell Korrektur.
+    autocmd FileType haskell map <leader>t :w! ~/test.hs<Enter>
 
 " Markdown.
     autocmd FileType markdown set textwidth=80
