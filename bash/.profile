@@ -18,6 +18,6 @@ fi
 
 for d in $HOME/.bin/*/; do PATH="$PATH:$d"; done
 
-export EDITOR=vim
+export EDITOR=nvim
 export TERMINAL=st
 export SEMESTER="$HOME/Dokumente/Uni/WiSe19-20"
