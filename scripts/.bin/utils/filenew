@@ -2,35 +2,49 @@
 
 # Create new files based on templates from $HOME/.templates
 
+query_template() {
+    if $(which fzf); then
+        return="$HOME/.templates/$(ls $HOME/.templates | fzf --color 16)"
+    else
+        ls -1 $HOME/.templates/
+        read -p "Enter Template Name: " return
+    fi
+}
+
+query_target() {
+    read -p "Target: " return
+}
+
 if [[ $# -eq 0 ]]; then
-    template=$HOME/.templates/$(ls $HOME/.templates | fzf --color 16)
+    query_template
+    template=$return
+    query_target
+    target=$return
 elif [[ $# -eq 1 ]]; then
     template=$HOME/.templates/$(ls $HOME/.templates | fzf -f $1 | head -n 1)
-    read -p "Target: " target
+    query_target
+    target=$return
 elif [[ $# -eq 2 ]]; then
     template=$HOME/.templates/$(ls $HOME/.templates | fzf -f $1 | head -n 1)
-    target=$2
+    query_target
+    target=$return
 else
     echo "Usage: filenew [template] [target]"
     exit 1
 fi
 
-if [[ $target != "" ]]; then
+echo $HOME/.templates/$template
+
+if [[ ! -f $HOME/.templates/$template ]]; then
     echo "No such template."
     exit 3
 fi
 
-if [[ $# -eq 0  || $# -eq 1 ]]; then
-    read -p "Target: " target
-elif [[ $# -eq 2 ]]; then
-    target=$2
-fi
-
-if [[ -f $target ]]; then
+if [[ -f $HOME/.templates/$target ]]; then
     echo "I'm afraid I cannot let you do that, Dave."
     echo "This file already exists."
     exit 2
 fi
 
-cp $template $target
+cp $HOME/.templates/$template $target
 echo "Created File $target from Template $template."
