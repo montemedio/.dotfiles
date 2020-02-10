@@ -1,0 +1,4 @@
+#!/bin/bash
+tmpfile=$(mktemp --suffix .png)
+gnome-screenshot -a -f $tmpfile
+feh $tmpfile
