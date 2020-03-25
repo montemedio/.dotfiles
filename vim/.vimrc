@@ -10,6 +10,8 @@ let mapleader =","
     Plug 'kien/ctrlp.vim'
 	Plug 'tpope/vim-surround'
 	Plug 'tpope/vim-repeat'  " damit der .-Operator auch für vim-surround funktioniert
+    Plug 'godlygeek/tabular'
+    Plug 'plasticboy/vim-markdown'
 	call plug#end()
 
 " Misc.
