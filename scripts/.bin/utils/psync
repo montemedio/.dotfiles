@@ -6,6 +6,14 @@ PWD_UUID="66E2-2710"
 
 ##################
 
+err_report() {
+    echo "Error on line $1"
+    notify-send -u critical "Error!"
+    exit 1
+}
+
+trap 'err_report $LINENO' ERR
+
 block_device="/dev/disk/by-uuid/${PWD_UUID}"
 udisks_msg=$(udisksctl mount -o ro -b $block_device 2>&1)
 udisks_status=$?
@@ -21,11 +29,14 @@ fi
 
 mount_dir=$(echo $udisks_msg | awk '{print $4}' | tr -d .)
 
-umask "u=r,g=,o="
+umask "077"
 cp ~/Passwörter/Passwörter.kdbx ~/Passwörter/.psync_rollback_$(date +"%Y_%m_%d-%H:%M:%S").kdbx
 rm -f ~/Passwörter/Passwörter.kdbx
 cp $mount_dir/Passwörter.kdbx ~/Passwörter/Passwörter.kdbx
 
+cp -r ~/.gnupg/ ~/Passwörter/.gnupg-rollback_$(date +"%Y_%m_%d-%H:%M:%S")
+rm -rf ~/.gnupg/
+cp -r $mount_dir/.gnupg ~/.gnupg
 umount $block_device
 
 echo "psync: Success"
