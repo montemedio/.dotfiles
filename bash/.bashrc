@@ -1,4 +1,4 @@
-	set -o vi
+set -o vi
 bind -m vi-insert "\C-l":clear-screen
 
 alias o="fileopen"
@@ -18,5 +18,8 @@ alias fzf="fzf --color 16"
 if [ -r /vol/local/etc/startup/profile ]; then
 	. /vol/local/etc/startup/profile
 fi
+
+export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+gpgconf --launch gpg-agent
 
 for d in $HOME/.bin/*/; do PATH="$PATH:$d"; done
