@@ -19,3 +19,5 @@ fi
 export EDITOR=nvim
 export TERMINAL=st
 export SEMESTER="$HOME/Dokumente/Uni/WiSe19-20"
+
+eval $(ssh-agent -s)
